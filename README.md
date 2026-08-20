@@ -1,2 +1,0 @@
-# chim
-belegh
