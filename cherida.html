@@ -1,0 +1,287 @@
+ <!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ألوان الشوارد</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070910;
+    --panel:#11141f;
+    --line:rgba(255,255,255,.08);
+    --violet:#9b7cf0;
+    --cyan:#5fd4e0;
+    --text:#eef0f7;
+    --muted:#8a8fa3;
+    --glass:#2a2f42;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; min-height:100vh;
+    background:radial-gradient(ellipse at 50% -10%, #171b30, var(--bg) 60%);
+    color:var(--text);
+    font-family:'Cairo',sans-serif;
+  }
+  .wrap{ max-width:900px; margin:0 auto; padding:26px 16px 50px; }
+
+  header{ text-align:center; margin-bottom:16px; }
+  .eyebrow{
+    font-size:12px; letter-spacing:.35em; color:var(--violet);
+    text-transform:uppercase; font-weight:700; margin-bottom:6px;
+  }
+  h1{
+    font-family:'Playfair Display',serif; font-weight:700; font-style:italic;
+    font-size:clamp(26px,5.5vw,42px); margin:0;
+    background:linear-gradient(90deg,var(--violet),#fff 50%,var(--cyan));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .sub{ color:var(--muted); font-size:13.5px; margin-top:6px; }
+
+  .modeSwitch{
+    display:flex; justify-content:center; gap:8px; margin-bottom:18px;
+  }
+  .modeSwitch button{
+    background:#151827; color:var(--muted); border:1px solid var(--line);
+    padding:9px 20px; border-radius:999px; font-family:'Cairo',sans-serif;
+    font-weight:700; font-size:13px; cursor:pointer; transition:all .2s ease;
+  }
+  .modeSwitch button.active{
+    background:linear-gradient(90deg,var(--violet),#6f4fd6);
+    color:#fff; border-color:transparent;
+  }
+
+  .stage{
+    position:relative;
+    background:linear-gradient(180deg,#0f1220,#07080d);
+    border-radius:16px;
+    padding:30px 16px;
+    box-shadow:0 30px 70px -25px rgba(0,0,0,.8), inset 0 0 0 1px var(--line);
+    display:flex; flex-direction:column; align-items:center; gap:16px;
+    min-height:300px;
+  }
+
+  /* solution mode: test tube */
+  .tube-wrap{ display:flex; justify-content:center; align-items:flex-end; height:220px; }
+  .tube{
+    position:relative; width:56px; height:190px;
+    border:3px solid var(--glass);
+    border-top:none;
+    border-radius:0 0 26px 26px;
+    background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.06));
+    overflow:hidden;
+    box-shadow:inset 0 0 12px rgba(255,255,255,.05);
+  }
+  .tube::before{
+    content:""; position:absolute; top:-3px; left:-9px; right:-9px; height:8px;
+    background:var(--glass); border-radius:4px;
+  }
+  .liquid{
+    position:absolute; left:0; right:0; bottom:0; height:65%;
+    background:#2a2f42;
+    transition:background 0.6s ease;
+  }
+  .liquid::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(255,255,255,.18), transparent 40%);
+  }
+  .bubble{
+    position:absolute; bottom:4px; border-radius:50%;
+    background:rgba(255,255,255,.35);
+    animation:bub 2.6s ease-in infinite;
+  }
+  @keyframes bub{
+    0%{ transform:translateY(0) scale(.6); opacity:0; }
+    20%{ opacity:.7; }
+    100%{ transform:translateY(-150px) scale(1.1); opacity:0; }
+  }
+
+  /* flame mode: bunsen burner */
+  .burner-wrap{ display:flex; flex-direction:column; align-items:center; height:220px; justify-content:flex-end; }
+  .flame2{
+    width:34px; height:80px;
+    background:radial-gradient(ellipse at 50% 75%, #fff6d0, #ffb23c 45%, #2a2f42 78%);
+    border-radius:50% 50% 45% 45% / 65% 65% 35% 35%;
+    margin-bottom:-4px;
+    animation:flick 0.85s ease-in-out infinite alternate;
+    transition:background 0.6s ease;
+    filter:drop-shadow(0 0 16px currentColor);
+  }
+  @keyframes flick{
+    0%{ transform:scaleY(1) rotate(-1.5deg); }
+    100%{ transform:scaleY(1.08) rotate(1.5deg); }
+  }
+  .burner-body{
+    width:16px; height:70px; background:#3a3f52; border-radius:2px;
+  }
+  .burner-base{
+    width:70px; height:14px; background:#2a2f42; border-radius:4px;
+  }
+
+  .status{
+    text-align:center;
+    font-family:'Playfair Display',serif; font-style:italic; font-size:16px;
+    color:var(--muted); min-height:22px;
+  }
+
+  .grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(78px,1fr));
+    gap:8px; margin-top:20px;
+  }
+  .ion-btn{
+    background:#151827; border:1px solid var(--line); border-radius:10px;
+    padding:10px 4px; text-align:center; cursor:pointer;
+    transition:transform .15s ease, border-color .15s ease;
+  }
+  .ion-btn:hover{ transform:translateY(-2px); }
+  .ion-btn.active{ border-color:var(--violet); box-shadow:0 0 0 2px rgba(155,124,240,.25); }
+  .ion-btn .sym{ font-weight:800; font-size:14px; }
+  .ion-btn .lbl{ font-size:10.5px; color:var(--muted); margin-top:2px; }
+
+  .panel{
+    margin-top:20px; background:var(--panel);
+    border:1px solid var(--line); border-radius:14px; padding:16px 18px;
+  }
+  .info h3{
+    margin:0 0 8px; font-family:'Playfair Display',serif; font-style:italic;
+    color:var(--cyan); font-size:19px;
+  }
+  .fact{
+    font-size:13px; color:var(--muted); margin:4px 0;
+    display:flex; justify-content:space-between; gap:10px;
+  }
+  .fact b{ color:var(--text); font-weight:600; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Qualitative Analysis</div>
+    <h1>ألوان الشوارد</h1>
+    <div class="sub">اختاري شاردة لعرض لونها في المحلول المائي أو عند اختبار اللهب</div>
+  </header>
+
+  <div class="modeSwitch">
+    <button id="modeSol" class="active">🧪 لون المحلول</button>
+    <button id="modeFlame">🔥 اختبار اللهب</button>
+  </div>
+
+  <div class="stage">
+    <div class="tube-wrap" id="solView">
+      <div class="tube">
+        <div class="liquid" id="liquid"></div>
+      </div>
+    </div>
+    <div class="burner-wrap" id="flameView" style="display:none;">
+      <div class="flame2" id="flame2"></div>
+      <div class="burner-body"></div>
+      <div class="burner-base"></div>
+    </div>
+    <div class="status" id="statusText">اختاري شاردة من القائمة أدناه</div>
+  </div>
+
+  <div class="grid" id="ionGrid"></div>
+
+  <div class="panel">
+    <div class="info" id="infoBox">
+      <h3 id="infoName">—</h3>
+      <div class="fact"><span>الصيغة</span><b id="infoFormula">—</b></div>
+      <div class="fact"><span>لون المحلول المائي</span><b id="infoSolColor">—</b></div>
+      <div class="fact"><span>لون اختبار اللهب</span><b id="infoFlameColor">—</b></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ions = [
+  { sym:"Cu²⁺", name:"نحاس (II)", formula:"Cu²⁺", solColor:"أزرق", solHex:"#3a7bd5", flameColor:"أخضر مزرق", flameHex:"#3ddc97" },
+  { sym:"Fe²⁺", name:"حديد (II)", formula:"Fe²⁺", solColor:"أخضر باهت", solHex:"#6f8f5a", flameColor:"لا لون مميز", flameHex:"#ffb23c" },
+  { sym:"Fe³⁺", name:"حديد (III)", formula:"Fe³⁺", solColor:"أصفر بني", solHex:"#b5762c", flameColor:"لا لون مميز", flameHex:"#ffb23c" },
+  { sym:"Ni²⁺", name:"نيكل (II)", formula:"Ni²⁺", solColor:"أخضر", solHex:"#3f9e4d", flameColor:"لا لون مميز", flameHex:"#ffb23c" },
+  { sym:"Co²⁺", name:"كوبالت (II)", formula:"Co²⁺", solColor:"وردي", solHex:"#e56b9f", flameColor:"لا لون مميز", flameHex:"#ffb23c" },
+  { sym:"Cr³⁺", name:"كروم (III)", formula:"Cr³⁺", solColor:"أخضر بنفسجي", solHex:"#5a7d5e", flameColor:"لا لون مميز", flameHex:"#ffb23c" },
+  { sym:"Mn²⁺", name:"منغنيز (II)", formula:"Mn²⁺", solColor:"وردي فاتح جدًا", solHex:"#e8d3da", flameColor:"لا لون مميز", flameHex:"#ffb23c" },
+  { sym:"Zn²⁺", name:"زنك", formula:"Zn²⁺", solColor:"عديم اللون", solHex:"#c9d6e0", flameColor:"لا لون مميز", flameHex:"#ffb23c" },
+  { sym:"Pb²⁺", name:"رصاص (II)", formula:"Pb²⁺", solColor:"عديم اللون", solHex:"#c9d6e0", flameColor:"أزرق مبيّض خافت", flameHex:"#9fc9e8" },
+  { sym:"Ag⁺", name:"فضة", formula:"Ag⁺", solColor:"عديم اللون", solHex:"#c9d6e0", flameColor:"لا لون مميز", flameHex:"#ffb23c" },
+  { sym:"MnO₄⁻", name:"برمنغنات", formula:"MnO₄⁻", solColor:"بنفسجي غامق", solHex:"#7b3fa0", flameColor:"—", flameHex:"#ffb23c" },
+  { sym:"CrO₄²⁻", name:"كرومات", formula:"CrO₄²⁻", solColor:"أصفر", solHex:"#d9c93a", flameColor:"—", flameHex:"#ffb23c" },
+  { sym:"Cr₂O₇²⁻", name:"ثنائي كرومات", formula:"Cr₂O₇²⁻", solColor:"برتقالي", solHex:"#d9791f", flameColor:"—", flameHex:"#ffb23c" },
+  { sym:"Na⁺", name:"صوديوم", formula:"Na⁺", solColor:"عديم اللون", solHex:"#c9d6e0", flameColor:"أصفر ذهبي", flameHex:"#f5d43a" },
+  { sym:"K⁺", name:"بوتاسيوم", formula:"K⁺", solColor:"عديم اللون", solHex:"#c9d6e0", flameColor:"بنفسجي خفيف", flameHex:"#c07be0" },
+  { sym:"Ca²⁺", name:"كالسيوم", formula:"Ca²⁺", solColor:"عديم اللون", solHex:"#c9d6e0", flameColor:"أحمر آجري", flameHex:"#e0602f" },
+  { sym:"Sr²⁺", name:"سترونشيوم", formula:"Sr²⁺", solColor:"عديم اللون", solHex:"#c9d6e0", flameColor:"أحمر قرمزي", flameHex:"#d61f3c" },
+  { sym:"Ba²⁺", name:"باريوم", formula:"Ba²⁺", solColor:"عديم اللون", solHex:"#c9d6e0", flameColor:"أخضر مصفر", flameHex:"#b8d63a" },
+  { sym:"Li⁺", name:"ليثيوم", formula:"Li⁺", solColor:"عديم اللون", solHex:"#c9d6e0", flameColor:"أحمر قرمزي فاتح", flameHex:"#e8456a" },
+];
+
+const ionGrid = document.getElementById('ionGrid');
+const liquid = document.getElementById('liquid');
+const flame2 = document.getElementById('flame2');
+const statusText = document.getElementById('statusText');
+const infoName = document.getElementById('infoName');
+const infoFormula = document.getElementById('infoFormula');
+const infoSolColor = document.getElementById('infoSolColor');
+const infoFlameColor = document.getElementById('infoFlameColor');
+
+let mode = 'sol';
+let selected = null;
+
+ions.forEach(ion=>{
+  const b = document.createElement('div');
+  b.className = 'ion-btn';
+  b.innerHTML = `<div class="sym">${ion.sym}</div><div class="lbl">${ion.name}</div>`;
+  b.addEventListener('click', ()=>{
+    selected = ion;
+    [...ionGrid.children].forEach(c=>c.classList.remove('active'));
+    b.classList.add('active');
+    render();
+  });
+  ionGrid.appendChild(b);
+});
+
+function render(){
+  if(!selected){
+    statusText.textContent = "اختاري شاردة من القائمة أدناه";
+    return;
+  }
+  infoName.textContent = selected.name;
+  infoFormula.textContent = selected.formula;
+  infoSolColor.textContent = selected.solColor;
+  infoFlameColor.textContent = selected.flameColor;
+
+  if(mode === 'sol'){
+    liquid.style.background = selected.solHex;
+    statusText.textContent = selected.name + " — " + selected.solColor + " في المحلول المائي";
+  } else {
+    flame2.style.background = `radial-gradient(ellipse at 50% 75%, #fff6d0, ${selected.flameHex} 45%, #2a2f42 78%)`;
+    flame2.style.color = selected.flameHex;
+    statusText.textContent = selected.name + " — " + selected.flameColor + " عند اختبار اللهب";
+  }
+}
+
+document.getElementById('modeSol').addEventListener('click', (e)=>{
+  mode = 'sol';
+  document.getElementById('modeSol').classList.add('active');
+  document.getElementById('modeFlame').classList.remove('active');
+  document.getElementById('solView').style.display = 'flex';
+  document.getElementById('flameView').style.display = 'none';
+  render();
+});
+document.getElementById('modeFlame').addEventListener('click', (e)=>{
+  mode = 'flame';
+  document.getElementById('modeFlame').classList.add('active');
+  document.getElementById('modeSol').classList.remove('active');
+  document.getElementById('flameView').style.display = 'flex';
+  document.getElementById('solView').style.display = 'none';
+  render();
+});
+
+// select first ion by default
+ionGrid.children[0].click();
+</script>
+
+</body>
+</html>

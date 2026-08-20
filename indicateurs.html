@@ -1,0 +1,312 @@
+ <!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الهليانتين · أزرق البروموتيمول · الفينولفتاليين | محاكاة التسحيح</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#eef3f5;
+    --paper:#ffffff;
+    --ink:#152b36;
+    --muted:#5f7784;
+    --line:#d7e2e6;
+    --accent:#d97e3c;
+    --accent-soft:rgba(217,126,60,0.1);
+    --grid: rgba(21,43,54,0.05);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      repeating-linear-gradient(0deg, var(--grid) 0px, var(--grid) 1px, transparent 1px, transparent 26px),
+      repeating-linear-gradient(90deg, var(--grid) 0px, var(--grid) 1px, transparent 1px, transparent 26px),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Cairo', sans-serif;
+    min-height:100vh;
+    padding:30px 16px 90px;
+  }
+  .wrap{max-width:1120px;margin:0 auto;}
+
+  header{ display:flex; flex-direction:column; align-items:center; text-align:center; margin-bottom:30px; }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:.16em;
+    color:var(--accent); border:1px solid var(--accent); padding:5px 16px; border-radius:999px;
+    margin-bottom:14px; background:var(--accent-soft);
+  }
+  h1{ font-size:clamp(24px,4.6vw,38px); font-weight:900; margin:0 0 8px; line-height:1.3; }
+  .sub{ color:var(--muted); font-size:14.5px; max-width:620px; line-height:1.9; }
+
+  .card{ background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:22px; }
+
+  /* ---- controls row ---- */
+  .controls-row{
+    display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:24px;
+  }
+  @media (max-width:700px){ .controls-row{grid-template-columns:1fr;} }
+  .field-label{ font-size:13px; font-weight:700; margin-bottom:10px; display:block; }
+  .btn-group{ display:flex; gap:8px; flex-wrap:wrap; }
+  .opt-btn{
+    background:#f4f7f8; border:1px solid var(--line); color:var(--ink);
+    border-radius:9px; padding:9px 14px; font-family:'Cairo',sans-serif; font-size:13px; font-weight:700;
+    cursor:pointer; transition:.2s;
+  }
+  .opt-btn.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .opt-btn small{ display:block; font-weight:400; font-size:10.5px; opacity:.75; margin-top:2px; }
+
+  input[type=range]{ width:100%; -webkit-appearance:none; height:7px; border-radius:5px; background:var(--line); outline:none; }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:19px; height:19px; border-radius:50%; background:#fff; border:3.5px solid var(--accent); cursor:pointer; }
+  input[type=range]::-moz-range-thumb{ width:19px; height:19px; border-radius:50%; background:#fff; border:3.5px solid var(--accent); cursor:pointer; }
+
+  .vol-readout{ font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--muted); margin-top:8px; display:flex; justify-content:space-between; }
+  .ph-badge{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:15px; color:var(--accent); }
+
+  /* ---- beakers ---- */
+  .beakers{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin:26px 0 8px;
+  }
+  @media (max-width:760px){ .beakers{grid-template-columns:1fr; max-width:220px; margin-inline:auto;} }
+  .beaker-card{ text-align:center; }
+  .beaker-name{ font-size:13.5px; font-weight:700; margin-bottom:2px; }
+  .beaker-range{ font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--muted); margin-bottom:10px; }
+  .beaker{
+    width:100px; height:120px; margin:0 auto;
+    border:2.5px solid #b9c8ce; border-top:none; border-radius:0 0 16px 16px;
+    position:relative; overflow:hidden; background:rgba(255,255,255,0.4);
+  }
+  .liquid{ position:absolute; bottom:0; left:0; right:0; height:70%; transition: background-color .5s ease; }
+  .beaker-state{
+    margin-top:8px; font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:999px; display:inline-block;
+    background:#f4f7f8; color:var(--ink);
+  }
+
+  /* ---- chart ---- */
+  .chart-wrap{ margin-top:30px; }
+  .chart-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; flex-wrap:wrap; gap:8px;}
+  .chart-head h3{ font-size:16px; margin:0; }
+  .legend{ display:flex; gap:14px; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); flex-wrap:wrap;}
+  .legend span{ display:inline-flex; align-items:center; gap:5px; }
+  .legend i{ width:10px; height:10px; border-radius:2px; display:inline-block; }
+
+  .info-box{
+    margin-top:18px; background:var(--accent-soft); border:1px solid rgba(217,126,60,0.3);
+    border-radius:10px; padding:14px 16px; font-size:13px; line-height:1.9;
+  }
+  .info-box b{ color:var(--accent); }
+
+  footer{ text-align:center; color:var(--muted); font-size:11.5px; margin-top:46px; font-family:'JetBrains Mono',monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">محاكاة تسحيح حمض-قاعدة</div>
+    <h1>الهليانتين (برتقالي الميثيل) · أزرق البروموتيمول · الفينولفتاليين</h1>
+    <p class="sub">أضف قاعدة تدريجيًا إلى حمض وشاهد كيف يتفاعل كل كاشف من الثلاثة حسب مدى تحوّله اللوني الخاص — ولماذا لا يصلح أي كاشف لكل أنواع التسحيح.</p>
+  </header>
+
+  <div class="card">
+
+    <div class="controls-row">
+      <div>
+        <label class="field-label">نوع التسحيح</label>
+        <div class="btn-group" id="titrationGroup"></div>
+      </div>
+      <div>
+        <label class="field-label">حجم القاعدة المُضافة</label>
+        <input type="range" id="volSlider" min="0" max="50" step="0.5" value="0">
+        <div class="vol-readout">
+          <span id="volEcho">0.0 مل</span>
+          <span class="ph-badge">pH = <span id="phEcho">1.0</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="beakers" id="beakersRow"></div>
+
+    <div class="chart-wrap">
+      <div class="chart-head">
+        <h3>منحنى التسحيح ومدى استجابة كل كاشف</h3>
+        <div class="legend">
+          <span><i style="background:#c23b3b"></i> منحنى pH</span>
+          <span><i style="background:#e0a83c"></i> الهليانتين 3.1–4.4</span>
+          <span><i style="background:#6fae6f"></i> أزرق البروموتيمول 6.0–7.6</span>
+          <span><i style="background:#c22187"></i> الفينولفتاليين 8.2–10</span>
+        </div>
+      </div>
+      <svg id="chartSvg" viewBox="0 0 600 260" style="width:100%; height:auto; display:block;"></svg>
+    </div>
+
+    <div class="info-box" id="infoBox"></div>
+  </div>
+
+  <footer>SIMULATION · ACID–BASE TITRATION INDICATORS · SIMPLIFIED MODEL</footer>
+</div>
+
+<script>
+// ============= titration scenarios (simplified educational model) =============
+const SCENARIOS = {
+  strong_strong: {
+    label:'حمض قوي + قاعدة قوية', small:'HCl + NaOH',
+    phStart:1.0, phEnd:13.0, phEq:7.0, veq:25, k:0.9,
+    note:'قفزة حادة وسريعة حول نقطة التكافؤ — تصلح معها كل الكواشف الثلاثة تقريبًا.'
+  },
+  weak_strong: {
+    label:'حمض ضعيف + قاعدة قوية', small:'CH₃COOH + NaOH',
+    phStart:2.9, phEnd:12.5, phEq:8.7, veq:25, k:0.45,
+    note:'منطقة تكافؤ قاعدية (pH≈8.7) — الفينولفتاليين هو الأنسب لأن مداه يطابق نقطة التكافؤ.'
+  },
+  strong_weak: {
+    label:'حمض قوي + قاعدة ضعيفة', small:'HCl + NH₃',
+    phStart:1.0, phEnd:11.0, phEq:5.3, veq:25, k:0.55,
+    note:'منطقة تكافؤ حمضية (pH≈5.3) — الهليانتين أو أزرق البروموتيمول أنسب من الفينولفتاليين.'
+  }
+};
+let currentScenario = 'strong_strong';
+
+function phAtVolume(sc, v){
+  const s = SCENARIOS[sc];
+  // logistic curve centered at veq
+  const t = 1/(1+Math.exp(-s.k*(v-s.veq)));
+  return s.phStart + (s.phEnd - s.phStart)*t;
+}
+
+// ============= indicators =============
+const INDICATORS = {
+  methylorange: {
+    name:'الهليانتين (برتقالي الميثيل)', range:'3.1 – 4.4',
+    stops:[[0,'#c23b3b'],[3.1,'#c23b3b'],[3.7,'#e0a83c'],[4.4,'#e0c23c'],[14,'#e0c23c']]
+  },
+  bromothymol: {
+    name:'أزرق البروموتيمول', range:'6.0 – 7.6',
+    stops:[[0,'#e0c23c'],[6.0,'#e0c23c'],[6.8,'#6fae6f'],[7.6,'#3b7fc2'],[14,'#3b7fc2']]
+  },
+  phenol: {
+    name:'الفينولفتاليين', range:'8.2 – 10',
+    stops:[[0,'#e7e2da'],[8.2,'#e7e2da'],[9.2,'#d84fa0'],[10,'#c22187'],[14,'#c22187']]
+  }
+};
+
+function hexToRgb(hex){ const v=hex.replace('#',''); return [parseInt(v.substr(0,2),16),parseInt(v.substr(2,2),16),parseInt(v.substr(4,2),16)]; }
+function rgbToHex(r,g,b){ return '#'+[r,g,b].map(x=>Math.round(x).toString(16).padStart(2,'0')).join(''); }
+function colorForPH(stops, ph){
+  for(let i=0;i<stops.length-1;i++){
+    const [p1,c1]=stops[i], [p2,c2]=stops[i+1];
+    if(ph>=p1 && ph<=p2){
+      const t = p2===p1?0:(ph-p1)/(p2-p1);
+      const [r1,g1,b1]=hexToRgb(c1), [r2,g2,b2]=hexToRgb(c2);
+      return rgbToHex(r1+(r2-r1)*t, g1+(g2-g1)*t, b1+(b2-b1)*t);
+    }
+  }
+  return stops[stops.length-1][1];
+}
+function stateLabel(key, ph){
+  if(key==='methylorange') return ph<3.1?'أحمر':ph<4.4?'برتقالي (انتقال)':'أصفر';
+  if(key==='bromothymol') return ph<6.0?'أصفر':ph<7.6?'أخضر (انتقال)':'أزرق';
+  return ph<8.2?'عديم اللون':ph<10?'وردي (انتقال)':'فوشيا';
+}
+
+// ============= build UI =============
+const titrationGroup = document.getElementById('titrationGroup');
+Object.entries(SCENARIOS).forEach(([key,s])=>{
+  const btn = document.createElement('button');
+  btn.className = 'opt-btn' + (key===currentScenario?' active':'');
+  btn.innerHTML = `${s.label}<small>${s.small}</small>`;
+  btn.addEventListener('click', ()=>{
+    currentScenario = key;
+    document.querySelectorAll('#titrationGroup .opt-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  });
+  titrationGroup.appendChild(btn);
+});
+
+const beakersRow = document.getElementById('beakersRow');
+Object.entries(INDICATORS).forEach(([key,ind])=>{
+  const div = document.createElement('div');
+  div.className = 'beaker-card';
+  div.innerHTML = `
+    <div class="beaker-name">${ind.name}</div>
+    <div class="beaker-range">pH ${ind.range}</div>
+    <div class="beaker"><div class="liquid" id="liquid-${key}"></div></div>
+    <div class="beaker-state" id="state-${key}"></div>
+  `;
+  beakersRow.appendChild(div);
+});
+
+const volSlider = document.getElementById('volSlider');
+const volEcho = document.getElementById('volEcho');
+const phEcho = document.getElementById('phEcho');
+const infoBox = document.getElementById('infoBox');
+const chartSvg = document.getElementById('chartSvg');
+
+function drawChart(sc){
+  const s = SCENARIOS[sc];
+  const W=600,H=260, padL=42,padR=14,padT=14,padB=30;
+  const plotW = W-padL-padR, plotH = H-padT-padB;
+  const xForV = v => padL + (v/50)*plotW;
+  const yForPH = ph => padT + (1-ph/14)*plotH;
+
+  let svg = '';
+  // indicator bands
+  const bands = [
+    {r:[3.1,4.4], c:'#e0a83c'},
+    {r:[6.0,7.6], c:'#6fae6f'},
+    {r:[8.2,10], c:'#c22187'}
+  ];
+  bands.forEach(b=>{
+    const y1=yForPH(b.r[1]), y2=yForPH(b.r[0]);
+    svg += `<rect x="${padL}" y="${y1}" width="${plotW}" height="${y2-y1}" fill="${b.c}" opacity="0.13"/>`;
+  });
+
+  // axes
+  svg += `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="#b9c8ce" stroke-width="1.5"/>`;
+  svg += `<line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="#b9c8ce" stroke-width="1.5"/>`;
+  [0,7,14].forEach(v=>{
+    svg += `<text x="${padL-8}" y="${yForPH(v)+4}" font-size="10" fill="#5f7784" text-anchor="end" font-family="JetBrains Mono">${v}</text>`;
+  });
+  [0,25,50].forEach(v=>{
+    svg += `<text x="${xForV(v)}" y="${H-padB+16}" font-size="10" fill="#5f7784" text-anchor="middle" font-family="JetBrains Mono">${v}</text>`;
+  });
+
+  // curve
+  let path = '';
+  for(let v=0; v<=50; v+=1){
+    const ph = phAtVolume(sc, v);
+    path += (v===0?'M':'L') + xForV(v).toFixed(1) + ',' + yForPH(ph).toFixed(1) + ' ';
+  }
+  svg += `<path d="${path}" fill="none" stroke="#c23b3b" stroke-width="2.5"/>`;
+
+  // current point
+  const curV = parseFloat(volSlider.value);
+  const curPH = phAtVolume(sc, curV);
+  svg += `<circle cx="${xForV(curV)}" cy="${yForPH(curPH)}" r="5.5" fill="#152b36" stroke="#fff" stroke-width="2"/>`;
+
+  chartSvg.innerHTML = svg;
+}
+
+function render(){
+  const v = parseFloat(volSlider.value);
+  const ph = phAtVolume(currentScenario, v);
+  volEcho.textContent = v.toFixed(1) + ' مل';
+  phEcho.textContent = ph.toFixed(2);
+
+  Object.entries(INDICATORS).forEach(([key,ind])=>{
+    const color = colorForPH(ind.stops, ph);
+    document.getElementById('liquid-'+key).style.background = color;
+    document.getElementById('state-'+key).textContent = stateLabel(key, ph);
+  });
+
+  drawChart(currentScenario);
+  infoBox.innerHTML = `<b>${SCENARIOS[currentScenario].label}:</b> ${SCENARIOS[currentScenario].note}`;
+}
+
+volSlider.addEventListener('input', render);
+render();
+</script>
+</body>
+</html>

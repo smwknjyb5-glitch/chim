@@ -1,0 +1,501 @@
+ <!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الجدول الدوري للعناصر الكيميائية</title>
+<style>
+  :root{
+    --navy-900:#050b1a;
+    --navy-800:#0a1530;
+    --navy-700:#122048;
+    --navy-600:#1a2c5e;
+    --gold:#d4af37;
+    --gold-light:#f3d878;
+    --text:#eef1fb;
+    --text-dim:#9aa6c9;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Tahoma','Segoe UI',sans-serif;
+    background:radial-gradient(ellipse at top, var(--navy-800), var(--navy-900) 70%);
+    color:var(--text);
+    min-height:100vh;
+    overflow-x:hidden;
+    position:relative;
+  }
+  #stars{position:fixed;inset:0;z-index:0;pointer-events:none;}
+  .star{position:absolute;background:#fff;border-radius:50%;opacity:.7;animation:twinkle 3s infinite ease-in-out;}
+  @keyframes twinkle{0%,100%{opacity:.2}50%{opacity:1}}
+
+  header{
+    text-align:center;
+    padding:28px 16px 14px;
+    position:relative;
+    z-index:1;
+  }
+  header h1{
+    color:var(--gold-light);
+    font-size:1.8em;
+    text-shadow:0 0 18px rgba(212,175,55,.5);
+    letter-spacing:1px;
+  }
+  header p{color:var(--text-dim);margin-top:6px;font-size:.95em;}
+
+  .toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:center;
+    padding:0 16px 18px;
+    position:relative;
+    z-index:1;
+  }
+  .toolbar button{
+    background:var(--navy-700);
+    border:1px solid var(--navy-600);
+    color:var(--text);
+    padding:7px 14px;
+    border-radius:20px;
+    font-size:.82em;
+    cursor:pointer;
+    transition:.2s;
+  }
+  .toolbar button:hover{border-color:var(--gold);color:var(--gold-light);}
+  .toolbar button.active{
+    background:linear-gradient(135deg,var(--gold),#b8860b);
+    color:var(--navy-900);
+    font-weight:bold;
+    border-color:var(--gold);
+  }
+
+  .table-wrap{
+    overflow-x:auto;
+    padding:10px 10px 30px;
+    position:relative;
+    z-index:1;
+  }
+  #grid{
+    display:grid;
+    grid-template-columns:repeat(18, minmax(38px,1fr));
+    gap:3px;
+    width:max-content;
+    margin:0 auto;
+    direction:ltr;
+  }
+  .cell{
+    width:44px;height:44px;
+    border-radius:6px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    font-size:.6em;
+    background:var(--navy-700);
+    border:1px solid rgba(255,255,255,.06);
+    transition:.15s;
+    position:relative;
+  }
+  .cell:hover{
+    transform:scale(1.18);
+    z-index:5;
+    box-shadow:0 0 14px rgba(212,175,55,.6);
+    border-color:var(--gold);
+  }
+  .cell .num{position:absolute;top:2px;left:3px;font-size:.75em;color:rgba(255,255,255,.55);}
+  .cell .sym{font-size:1.35em;font-weight:bold;line-height:1;}
+  .cell.dim{opacity:.18;filter:grayscale(.6);}
+  .cell.placeholder{visibility:hidden;pointer-events:none;}
+  .cell.selected{outline:3px solid var(--gold-light);transform:scale(1.2);z-index:6;}
+
+  /* category colors */
+  .cat-alkali{background:#7a2f2f;}
+  .cat-alkaline{background:#8a5a2f;}
+  .cat-transition{background:#2f6a7a;}
+  .cat-post{background:#2f5d7a;}
+  .cat-metalloid{background:#4a7a3f;}
+  .cat-nonmetal{background:#3f7a5c;}
+  .cat-halogen{background:#7a6a2f;}
+  .cat-noble{background:#5c2f7a;}
+  .cat-lanth{background:#7a2f6a;}
+  .cat-act{background:#7a3f2f;}
+  .cat-unknown{background:#3a3a4a;}
+
+  .legend{
+    display:flex;flex-wrap:wrap;gap:8px;
+    justify-content:center;
+    padding:0 16px 20px;
+    font-size:.72em;
+    position:relative;z-index:1;
+  }
+  .legend span{
+    display:flex;align-items:center;gap:5px;
+    background:rgba(255,255,255,.03);
+    padding:3px 9px;border-radius:12px;
+  }
+  .legend i{width:12px;height:12px;border-radius:3px;display:inline-block;}
+
+  /* Info panel */
+  #overlay{
+    position:fixed;inset:0;background:rgba(2,6,18,.75);
+    backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;
+    z-index:50;padding:16px;
+  }
+  #overlay.show{display:flex;}
+  #panel{
+    background:linear-gradient(160deg,var(--navy-700),var(--navy-800));
+    border:1px solid var(--gold);
+    border-radius:16px;
+    max-width:420px;width:100%;
+    padding:22px;
+    box-shadow:0 0 40px rgba(212,175,55,.25);
+    max-height:85vh;overflow-y:auto;
+    position:relative;
+  }
+  #panel .close{
+    position:absolute;top:12px;left:14px;
+    background:none;border:none;color:var(--text-dim);
+    font-size:1.4em;cursor:pointer;
+  }
+  .panel-head{display:flex;align-items:center;gap:16px;margin-bottom:12px;}
+  .panel-symbol{
+    width:70px;height:70px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:2em;font-weight:bold;flex-shrink:0;
+  }
+  .panel-head h2{color:var(--gold-light);font-size:1.3em;}
+  .panel-head .num-mass{color:var(--text-dim);font-size:.85em;margin-top:3px;}
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0;}
+  .info-item{
+    background:rgba(255,255,255,.04);
+    border-radius:8px;padding:8px 10px;font-size:.82em;
+  }
+  .info-item b{color:var(--gold-light);display:block;font-size:.78em;margin-bottom:2px;}
+  .panel-desc{font-size:.88em;line-height:1.7;color:var(--text);margin-top:10px;}
+  .panel-uses{font-size:.85em;line-height:1.7;color:var(--text-dim);margin-top:8px;}
+
+  /* Quiz */
+  #quizBtn{
+    display:block;margin:0 auto 30px;
+    background:linear-gradient(135deg,var(--gold),#b8860b);
+    color:var(--navy-900);border:none;
+    padding:12px 30px;border-radius:24px;
+    font-weight:bold;font-size:1em;cursor:pointer;
+    box-shadow:0 4px 18px rgba(212,175,55,.3);
+    position:relative;z-index:1;
+  }
+  #quizArea{
+    max-width:520px;margin:0 auto 40px;
+    background:var(--navy-700);
+    border:1px solid var(--navy-600);
+    border-radius:16px;padding:22px;
+    display:none;position:relative;z-index:1;
+  }
+  #quizArea.show{display:block;}
+  #quizArea h3{color:var(--gold-light);margin-bottom:14px;font-size:1.05em;}
+  .q-text{font-size:1em;margin-bottom:14px;line-height:1.6;}
+  .q-opts{display:grid;gap:8px;}
+  .q-opt{
+    background:var(--navy-600);border:1px solid transparent;
+    padding:10px 14px;border-radius:10px;cursor:pointer;
+    font-size:.9em;transition:.15s;text-align:right;
+  }
+  .q-opt:hover{border-color:var(--gold);}
+  .q-opt.correct{background:#2f6a3f;border-color:#5cba6f;}
+  .q-opt.wrong{background:#6a2f2f;border-color:#ba5c5c;}
+  #quizFeedback{margin-top:12px;font-size:.88em;min-height:20px;color:var(--gold-light);}
+  #quizScore{margin-top:10px;font-size:.82em;color:var(--text-dim);}
+  #nextQBtn{
+    margin-top:14px;background:var(--navy-800);color:var(--text);
+    border:1px solid var(--gold);padding:8px 18px;border-radius:20px;
+    cursor:pointer;font-size:.85em;display:none;
+  }
+  footer{text-align:center;padding:16px;color:var(--text-dim);font-size:.75em;position:relative;z-index:1;}
+
+  @media (max-width:600px){
+    .cell{width:34px;height:34px;font-size:.55em;}
+    #grid{grid-template-columns:repeat(18, minmax(30px,1fr));}
+    header h1{font-size:1.35em;}
+  }
+</style>
+</head>
+<body>
+<div id="stars"></div>
+
+<header>
+  <h1>⚛️ الجدول الدوري للعناصر الكيميائية</h1>
+  <p>اضغط على أي عنصر لاستكشاف خصائصه — أو جرّب الاختبار التفاعلي</p>
+</header>
+
+<div class="toolbar" id="toolbar"></div>
+
+<div class="table-wrap">
+  <div id="grid"></div>
+</div>
+
+<div class="legend" id="legend"></div>
+
+<button id="quizBtn">🎯 ابدأ الاختبار التفاعلي</button>
+<div id="quizArea">
+  <h3>اختبر معلوماتك</h3>
+  <div class="q-text" id="qText"></div>
+  <div class="q-opts" id="qOpts"></div>
+  <div id="quizFeedback"></div>
+  <div id="quizScore"></div>
+  <button id="nextQBtn">السؤال التالي ←</button>
+</div>
+
+<div id="overlay">
+  <div id="panel">
+    <button class="close" id="closePanel">✕</button>
+    <div id="panelContent"></div>
+  </div>
+</div>
+
+<footer>محاكاة تعليمية تفاعلية · الجدول الدوري للعناصر</footer>
+
+<script>
+/* ============ بيانات العناصر (أول 54 عنصرًا + عناصر مختارة مشهورة) ============ */
+const CATS = {
+  alkali:{name:'فلزات قلوية', cls:'cat-alkali'},
+  alkaline:{name:'فلزات قلوية ترابية', cls:'cat-alkaline'},
+  transition:{name:'فلزات انتقالية', cls:'cat-transition'},
+  post:{name:'فلزات ما بعد الانتقالية', cls:'cat-post'},
+  metalloid:{name:'أشباه فلزات', cls:'cat-metalloid'},
+  nonmetal:{name:'لافلزات', cls:'cat-nonmetal'},
+  halogen:{name:'هالوجينات', cls:'cat-halogen'},
+  noble:{name:'غازات نبيلة', cls:'cat-noble'},
+  lanth:{name:'لانثانيدات', cls:'cat-lanth'},
+  act:{name:'أكتينيدات', cls:'cat-act'},
+  unknown:{name:'غير مصنّف', cls:'cat-unknown'}
+};
+
+// row, col حسب الجدول الدوري القياسي (18 عمودًا)
+const ELEMENTS = [
+{n:1,s:'H',name:'الهيدروجين',mass:'1.008',cat:'nonmetal',r:1,c:1,state:'غاز',desc:'أخف وأبسط عنصر في الكون، يتكون من بروتون وإلكترون واحد فقط.',uses:'وقود الصواريخ، إنتاج الأمونيا، خلايا الوقود.'},
+{n:2,s:'He',name:'الهيليوم',mass:'4.003',cat:'noble',r:1,c:18,state:'غاز',desc:'غاز نبيل خامل، ثاني أخف عنصر، لا يتفاعل كيميائيًا في الظروف العادية.',uses:'نفخ المناطيد، تبريد المغناطيسات الفائقة التوصيل.'},
+{n:3,s:'Li',name:'الليثيوم',mass:'6.94',cat:'alkali',r:2,c:1,state:'صلب',desc:'أخف الفلزات وأكثرها تفاعلاً نسبيًا، لين يمكن قطعه بسكين.',uses:'بطاريات الليثيوم-أيون، أدوية الاضطرابات النفسية.'},
+{n:4,s:'Be',name:'البيريليوم',mass:'9.012',cat:'alkaline',r:2,c:2,state:'صلب',desc:'فلز خفيف وصلب وسام، نادر نسبيًا.',uses:'أجزاء الطائرات، نوافذ أشعة إكس.'},
+{n:5,s:'B',name:'البورون',mass:'10.81',cat:'metalloid',r:2,c:13,state:'صلب',desc:'شبه فلز صلب يستخدم في الزجاج المقاوم للحرارة.',uses:'زجاج بيركس، مواد التنظيف، الأسمدة.'},
+{n:6,s:'C',name:'الكربون',mass:'12.01',cat:'nonmetal',r:2,c:14,state:'صلب',desc:'أساس الحياة على الأرض، يوجد على شكل الماس والغرافيت.',uses:'الفولاذ، أقلام الرصاص، جميع المركبات العضوية.'},
+{n:7,s:'N',name:'الآزوت',mass:'14.01',cat:'nonmetal',r:2,c:15,state:'غاز',desc:'يشكل نحو 78٪ من الغلاف الجوي للأرض، خامل نسبيًا.',uses:'الأسمدة، حفظ الأغذية، صناعة المتفجرات.'},
+{n:8,s:'O',name:'الأكسجين',mass:'16.00',cat:'nonmetal',r:2,c:16,state:'غاز',desc:'ضروري للتنفس ويشكل نحو 21٪ من الهواء الجوي.',uses:'التنفس، اللحام، الطب.'},
+{n:9,s:'F',name:'الفلور',mass:'19.00',cat:'halogen',r:2,c:17,state:'غاز',desc:'أكثر العناصر كهروسلبية وتفاعلاً في الجدول الدوري.',uses:'معجون الأسنان، مادة التفلون، صناعة الأدوية.'},
+{n:10,s:'Ne',name:'النيون',mass:'20.18',cat:'noble',r:2,c:18,state:'غاز',desc:'غاز نبيل خامل يُصدر ضوءًا برتقاليًا مميزًا عند التفريغ الكهربائي.',uses:'لافتات النيون المضيئة.'},
+{n:11,s:'Na',name:'الصوديوم',mass:'22.99',cat:'alkali',r:3,c:1,state:'صلب',desc:'فلز لين شديد التفاعل، يتفاعل بعنف مع الماء.',uses:'ملح الطعام، مصابيح الإضاءة، الصناعات الكيميائية.'},
+{n:12,s:'Mg',name:'المغنيسيوم',mass:'24.31',cat:'alkaline',r:3,c:2,state:'صلب',desc:'فلز خفيف يحترق بضوء أبيض ساطع.',uses:'سبائك خفيفة، الألعاب النارية، اليخضور في النباتات.'},
+{n:13,s:'Al',name:'الألومنيوم',mass:'26.98',cat:'post',r:3,c:13,state:'صلب',desc:'أكثر الفلزات وفرة في القشرة الأرضية، خفيف ومقاوم للصدأ.',uses:'علب المشروبات، صناعة الطائرات، أدوات المطبخ.'},
+{n:14,s:'Si',name:'السيليكون',mass:'28.09',cat:'metalloid',r:3,c:14,state:'صلب',desc:'أساس صناعة الإلكترونيات وأشباه الموصلات.',uses:'الرقائق الإلكترونية، الزجاج، الطاقة الشمسية.'},
+{n:15,s:'P',name:'الفوسفور',mass:'30.97',cat:'nonmetal',r:3,c:15,state:'صلب',desc:'ضروري للحمض النووي والعظام، له عدة أشكال منها الأبيض والأحمر.',uses:'الأسمدة، أعواد الثقاب، المتفجرات.'},
+{n:16,s:'S',name:'الكبريت',mass:'32.06',cat:'nonmetal',r:3,c:16,state:'صلب',desc:'عنصر أصفر صلب ذو رائحة مميزة عند احتراقه.',uses:'المطاط، الأسمدة، حمض الكبريتيك.'},
+{n:17,s:'Cl',name:'الكلور',mass:'35.45',cat:'halogen',r:3,c:17,state:'غاز',desc:'غاز أخضر مصفر سام، معقم قوي.',uses:'تعقيم المياه، صناعة PVC، المبيّضات.'},
+{n:18,s:'Ar',name:'الأرغون',mass:'39.95',cat:'noble',r:3,c:18,state:'غاز',desc:'أكثر الغازات النبيلة وفرة في الغلاف الجوي.',uses:'ملء المصابيح، اللحام بالقوس.'},
+{n:19,s:'K',name:'البوتاسيوم',mass:'39.10',cat:'alkali',r:4,c:1,state:'صلب',desc:'فلز شديد التفاعل وضروري لوظائف الخلايا الحية.',uses:'الأسمدة، توازن السوائل في الجسم.'},
+{n:20,s:'Ca',name:'الكالسيوم',mass:'40.08',cat:'alkaline',r:4,c:2,state:'صلب',desc:'أساسي لبناء العظام والأسنان.',uses:'الإسمنت، العظام، منتجات الألبان.'},
+{n:21,s:'Sc',name:'السكانديوم',mass:'44.96',cat:'transition',r:4,c:3,state:'صلب',desc:'فلز انتقالي نادر خفيف الوزن.',uses:'سبائك الطيران، مصابيح عالية الكثافة.'},
+{n:22,s:'Ti',name:'التيتانيوم',mass:'47.87',cat:'transition',r:4,c:4,state:'صلب',desc:'قوي وخفيف ومقاوم للتآكل بشكل استثنائي.',uses:'الطائرات، الغرسات الطبية، الدهانات.'},
+{n:23,s:'V',name:'الفاناديوم',mass:'50.94',cat:'transition',r:4,c:5,state:'صلب',desc:'فلز صلب يستخدم لتقوية الفولاذ.',uses:'سبائك الفولاذ، بطاريات التدفق.'},
+{n:24,s:'Cr',name:'الكروم',mass:'52.00',cat:'transition',r:4,c:6,state:'صلب',desc:'فلز لامع مقاوم للصدأ يُستخدم للطلاء اللامع.',uses:'الفولاذ المقاوم للصدأ، الطلاء الكرومي.'},
+{n:25,s:'Mn',name:'المنغنيز',mass:'54.94',cat:'transition',r:4,c:7,state:'صلب',desc:'ضروري لإنتاج الفولاذ عالي القوة.',uses:'صناعة الفولاذ، البطاريات الجافة.'},
+{n:26,s:'Fe',name:'الحديد',mass:'55.85',cat:'transition',r:4,c:8,state:'صلب',desc:'أكثر الفلزات استخدامًا في العالم، أساس الهيموغلوبين في الدم.',uses:'البناء، صناعة السيارات، الفولاذ.'},
+{n:27,s:'Co',name:'الكوبالت',mass:'58.93',cat:'transition',r:4,c:9,state:'صلب',desc:'فلز مغناطيسي يستخدم في السبائك والأصباغ الزرقاء.',uses:'بطاريات الليثيوم، السبائك المقاومة للحرارة.'},
+{n:28,s:'Ni',name:'النيكل',mass:'58.69',cat:'transition',r:4,c:10,state:'صلب',desc:'فلز مقاوم للتآكل يُستخدم في العملات المعدنية.',uses:'الفولاذ المقاوم، العملات، البطاريات.'},
+{n:29,s:'Cu',name:'النحاس',mass:'63.55',cat:'transition',r:4,c:11,state:'صلب',desc:'موصل ممتاز للكهرباء والحرارة، معروف منذ العصور القديمة.',uses:'الأسلاك الكهربائية، الأنابيب، السبائك.'},
+{n:30,s:'Zn',name:'الزنك',mass:'65.38',cat:'transition',r:4,c:12,state:'صلب',desc:'يستخدم لحماية الحديد من الصدأ عبر الطلاء الغلفاني.',uses:'الطلاء الواقي، البطاريات، المكملات الغذائية.'},
+{n:31,s:'Ga',name:'الغاليوم',mass:'69.72',cat:'post',r:4,c:13,state:'صلب',desc:'فلز ينصهر عند حرارة اليد تقريبًا.',uses:'أشباه الموصلات، موازين الحرارة.'},
+{n:32,s:'Ge',name:'الجرمانيوم',mass:'72.63',cat:'metalloid',r:4,c:14,state:'صلب',desc:'شبه فلز استُخدم في أول أجهزة الترانزستور.',uses:'الألياف الضوئية، الإلكترونيات.'},
+{n:33,s:'As',name:'الزرنيخ',mass:'74.92',cat:'metalloid',r:4,c:15,state:'صلب',desc:'شبه فلز سام معروف تاريخيًا كسم.',uses:'أشباه الموصلات، مبيدات الآفات (سابقًا).'},
+{n:34,s:'Se',name:'السيلينيوم',mass:'78.97',cat:'nonmetal',r:4,c:16,state:'صلب',desc:'عنصر أساسي بكميات ضئيلة لصحة الإنسان.',uses:'الخلايا الشمسية، الزجاج، المكملات الغذائية.'},
+{n:35,s:'Br',name:'البروم',mass:'79.90',cat:'halogen',r:4,c:17,state:'سائل',desc:'العنصر السائل غير الفلزي الوحيد في درجة حرارة الغرفة.',uses:'مثبطات اللهب، المطهرات.'},
+{n:36,s:'Kr',name:'الكريبتون',mass:'83.80',cat:'noble',r:4,c:18,state:'غاز',desc:'غاز نبيل نادر يُستخدم في الإضاءة عالية الكفاءة.',uses:'مصابيح الفلاش، الإضاءة الفلورية.'},
+{n:47,s:'Ag',name:'الفضة',mass:'107.87',cat:'transition',r:5,c:11,state:'صلب',desc:'أفضل موصل كهربائي معروف، ولامع بشكل مميز.',uses:'المجوهرات، الإلكترونيات، الفضيات.'},
+{n:50,s:'Sn',name:'القصدير',mass:'118.71',cat:'post',r:5,c:14,state:'صلب',desc:'فلز لين يُستخدم منذ العصور القديمة في صناعة البرونز.',uses:'اللحام، صفائح التعليب.'},
+{n:53,s:'I',name:'اليود',mass:'126.90',cat:'halogen',r:5,c:17,state:'صلب',desc:'هالوجين صلب يتسامى مباشرة إلى بخار بنفسجي.',uses:'المطهرات، الغدة الدرقية، الملح الميوّد.'},
+{n:54,s:'Xe',name:'الزينون',mass:'131.29',cat:'noble',r:5,c:18,state:'غاز',desc:'غاز نبيل ثقيل يُستخدم في المصابيح عالية الشدة.',uses:'مصابيح السيارات، الدفع الأيوني للأقمار الصناعية.'},
+{n:78,s:'Pt',name:'البلاتين',mass:'195.08',cat:'transition',r:6,c:10,state:'صلب',desc:'فلز ثمين نادر جدًا ومقاوم للتآكل.',uses:'المجوهرات، المحولات الحفازة، الطب.'},
+{n:79,s:'Au',name:'الذهب',mass:'196.97',cat:'transition',r:6,c:11,state:'صلب',desc:'فلز ثمين لا يصدأ، معروف منذ آلاف السنين.',uses:'المجوهرات، الإلكترونيات، احتياطي البنوك.'},
+{n:80,s:'Hg',name:'الزئبق',mass:'200.59',cat:'transition',r:6,c:12,state:'سائل',desc:'الفلز السائل الوحيد في درجة حرارة الغرفة، سام.',uses:'موازين الحرارة القديمة، المصابيح.'},
+{n:82,s:'Pb',name:'الرصاص',mass:'207.2',cat:'post',r:6,c:14,state:'صلب',desc:'فلز ثقيل سام تراكميًا، لكنه مقاوم للتآكل.',uses:'البطاريات، الحماية من الإشعاع.'},
+{n:92,s:'U',name:'اليورانيوم',mass:'238.03',cat:'act',r:7,c:3,state:'صلب',desc:'عنصر مشع ثقيل يستخدم كوقود نووي.',uses:'الطاقة النووية، الأسلحة النووية.'},
+];
+
+// خانات فارغة (اللانثانيدات/الأكتينيدات المختزلة إلى صف 3 عمود 3، وبقية العناصر غير المذكورة تُترك فارغة شفافة)
+const GRID_ROWS = 7, GRID_COLS = 18;
+
+/* ============ بناء الجدول ============ */
+const grid = document.getElementById('grid');
+const cellMap = {};
+for(let r=1;r<=GRID_ROWS;r++){
+  for(let c=1;c<=GRID_COLS;c++){
+    const div = document.createElement('div');
+    div.className = 'cell placeholder';
+    div.dataset.r=r; div.dataset.c=c;
+    grid.appendChild(div);
+    cellMap[r+'-'+c]=div;
+  }
+}
+ELEMENTS.forEach(el=>{
+  const cell = cellMap[el.r+'-'+el.c];
+  if(!cell) return;
+  cell.className = 'cell ' + CATS[el.cat].cls;
+  cell.innerHTML = `<span class="num">${el.n}</span><span class="sym">${el.s}</span>`;
+  cell.dataset.symbol = el.s;
+  cell.addEventListener('click', ()=>openPanel(el));
+});
+
+/* ============ شريط الفئات (تصفية) ============ */
+const toolbar = document.getElementById('toolbar');
+const allBtn = document.createElement('button');
+allBtn.textContent = 'الكل'; allBtn.className='active';
+allBtn.onclick = ()=>filterCat(null, allBtn);
+toolbar.appendChild(allBtn);
+Object.entries(CATS).forEach(([key,val])=>{
+  if(!ELEMENTS.some(e=>e.cat===key)) return;
+  const b=document.createElement('button');
+  b.textContent = val.name;
+  b.onclick = ()=>filterCat(key,b);
+  toolbar.appendChild(b);
+});
+function filterCat(cat, btn){
+  [...toolbar.children].forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.cell:not(.placeholder)').forEach(c=>{
+    if(!cat) c.classList.remove('dim');
+    else c.classList.toggle('dim', !c.classList.contains(CATS[cat].cls));
+  });
+}
+
+/* ============ وسيلة الإيضاح ============ */
+const legend = document.getElementById('legend');
+Object.entries(CATS).forEach(([key,val])=>{
+  if(!ELEMENTS.some(e=>e.cat===key)) return;
+  const s=document.createElement('span');
+  s.innerHTML = `<i class="${val.cls}"></i>${val.name}`;
+  legend.appendChild(s);
+});
+
+/* ============ لوحة المعلومات ============ */
+const overlay = document.getElementById('overlay');
+const panelContent = document.getElementById('panelContent');
+function openPanel(el){
+  document.querySelectorAll('.cell').forEach(c=>c.classList.remove('selected'));
+  const cell = document.querySelector(`.cell[data-symbol="${el.s}"]`);
+  if(cell) cell.classList.add('selected');
+  panelContent.innerHTML = `
+    <div class="panel-head">
+      <div class="panel-symbol ${CATS[el.cat].cls}">${el.s}</div>
+      <div>
+        <h2>${el.name}</h2>
+        <div class="num-mass">العدد الذري: ${el.n} · الكتلة الذرية: ${el.mass}</div>
+      </div>
+    </div>
+    <div class="info-grid">
+      <div class="info-item"><b>التصنيف</b>${CATS[el.cat].name}</div>
+      <div class="info-item"><b>الحالة الفيزيائية</b>${el.state}</div>
+    </div>
+    <div class="panel-desc">${el.desc}</div>
+    <div class="panel-uses"><b style="color:var(--gold-light)">الاستخدامات: </b>${el.uses}</div>
+  `;
+  overlay.classList.add('show');
+}
+document.getElementById('closePanel').onclick = ()=>overlay.classList.remove('show');
+overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.classList.remove('show'); });
+
+/* ============ الاختبار التفاعلي ============ */
+const quizBtn = document.getElementById('quizBtn');
+const quizArea = document.getElementById('quizArea');
+const qText = document.getElementById('qText');
+const qOpts = document.getElementById('qOpts');
+const feedback = document.getElementById('quizFeedback');
+const scoreEl = document.getElementById('quizScore');
+const nextBtn = document.getElementById('nextQBtn');
+
+let score=0, total=0, currentQ=null;
+const QUESTION_TYPES = ['symbolToName','nameToSymbol','category','number'];
+
+function pickRandom(arr,n){
+  const copy=[...arr]; const out=[];
+  while(out.length<n && copy.length){
+    out.push(copy.splice(Math.floor(Math.random()*copy.length),1)[0]);
+  }
+  return out;
+}
+
+function newQuestion(){
+  feedback.textContent=''; nextBtn.style.display='none';
+  const type = QUESTION_TYPES[Math.floor(Math.random()*QUESTION_TYPES.length)];
+  const el = ELEMENTS[Math.floor(Math.random()*ELEMENTS.length)];
+  let question, correct, options;
+
+  if(type==='symbolToName'){
+    question = `ما اسم العنصر الذي رمزه <b style="color:var(--gold-light);font-size:1.2em">${el.s}</b> ؟`;
+    correct = el.name;
+    options = pickRandom(ELEMENTS.filter(e=>e.n!==el.n),3).map(e=>e.name);
+  } else if(type==='nameToSymbol'){
+    question = `ما رمز عنصر <b style="color:var(--gold-light)">${el.name}</b> ؟`;
+    correct = el.s;
+    options = pickRandom(ELEMENTS.filter(e=>e.n!==el.n),3).map(e=>e.s);
+  } else if(type==='category'){
+    question = `إلى أي فئة ينتمي عنصر <b style="color:var(--gold-light)">${el.name} (${el.s})</b> ؟`;
+    correct = CATS[el.cat].name;
+    const otherCats = Object.entries(CATS).filter(([k])=>k!==el.cat && ELEMENTS.some(e=>e.cat===k)).map(([k,v])=>v.name);
+    options = pickRandom(otherCats,3);
+  } else {
+    question = `ما العدد الذري لعنصر <b style="color:var(--gold-light)">${el.name} (${el.s})</b> ؟`;
+    correct = String(el.n);
+    const others = pickRandom(ELEMENTS.filter(e=>e.n!==el.n),3).map(e=>String(e.n));
+    options = others;
+  }
+
+  options.push(correct);
+  options = options.sort(()=>Math.random()-0.5);
+  currentQ = {correct};
+  qText.innerHTML = question;
+  qOpts.innerHTML='';
+  options.forEach(opt=>{
+    const b=document.createElement('div');
+    b.className='q-opt';
+    b.textContent=opt;
+    b.onclick=()=>answer(b,opt);
+    qOpts.appendChild(b);
+  });
+}
+
+function answer(btn, opt){
+  if(currentQ.answered) return;
+  currentQ.answered=true;
+  total++;
+  const correct = opt===currentQ.correct;
+  if(correct) score++;
+  [...qOpts.children].forEach(o=>{
+    if(o.textContent===currentQ.correct) o.classList.add('correct');
+    else if(o===btn) o.classList.add('wrong');
+  });
+  feedback.textContent = correct ? '✅ إجابة صحيحة!' : `❌ غير صحيح. الإجابة الصحيحة: ${currentQ.correct}`;
+  scoreEl.textContent = `النتيجة: ${score} من ${total}`;
+  nextBtn.style.display='inline-block';
+}
+
+quizBtn.onclick = ()=>{
+  quizArea.classList.toggle('show');
+  if(quizArea.classList.contains('show')) newQuestion();
+};
+nextBtn.onclick = newQuestion;
+
+/* ============ خلفية نجوم ============ */
+const starsC = document.getElementById('stars');
+for(let i=0;i<80;i++){
+  const s=document.createElement('div');
+  s.className='star';
+  const size = Math.random()*2+1;
+  s.style.width=s.style.height=size+'px';
+  s.style.top=Math.random()*100+'%';
+  s.style.left=Math.random()*100+'%';
+  s.style.animationDelay=(Math.random()*3)+'s';
+  starsC.appendChild(s);
+}
+</script>
+</body>
+</html>
